@@ -1,0 +1,37 @@
+manifest_version = 2
+
+[package]
+name = "moonstone/alter-workspace"
+version = "0.1.0"
+kind = "script"
+description = "Alter Structured Document Editing Host and Backends"
+
+[interpreter]
+name = "lua"
+version = "5.4"
+abi = "5.4"
+
+[scripts]
+test = "lua ./test_all.lua"
+package = "moon exec ballad -- play partiture.lua"
+
+[[dependencies]]
+name = "moonstone/ballad"
+constraint = "^0.3.5"
+role = "tool"
+
+[[orbits.member]]
+name = "host"
+path = "host"
+
+[[orbits.member]]
+name = "json-backend"
+path = "json-backend"
+
+[[orbits.member]]
+name = "jsonc-backend"
+path = "jsonc-backend"
+
+[[orbits.member]]
+name = "toml-backend"
+path = "toml-backend"

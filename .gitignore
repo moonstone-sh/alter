@@ -1,0 +1,11 @@
+# Moonstone
+.moonstone/
+.ballad/
+dist/
+
+# Zig
+zig-cache/
+zig-out/
+
+# OS
+.DS_Store

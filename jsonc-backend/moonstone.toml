@@ -1,0 +1,33 @@
+manifest_version = 2
+
+[package]
+name = "moonstone/alter-jsonc"
+version = "0.1.0"
+kind = "lib"
+description = "Alter JSONC backend"
+
+[interpreter]
+name = "lua"
+version = "5.4"
+abi = "5.4"
+
+[scripts]
+test = "lua ./tests/runner.lua"
+package = "moon exec ballad -- play partiture.lua"
+
+[[dependencies]]
+name = "moonstone/ballad"
+constraint = "^0.3.5"
+role = "tool"
+
+[[dependencies]]
+name = "moonstone/alter"
+constraint = "path:../host"
+registry = "path"
+role = "runtime"
+
+[[dependencies]]
+name = "moonstone/alter-json"
+constraint = "path:../json-backend"
+registry = "path"
+role = "runtime"
