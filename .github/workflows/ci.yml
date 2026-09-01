@@ -47,9 +47,7 @@ jobs:
         run: scripts/sync-local-packages.sh
       - name: Run host and backend tests
         run: |
-          moon exec env \
-            LUA_PATH="$GITHUB_WORKSPACE/.ci/valua/src/?.lua;$GITHUB_WORKSPACE/.ci/valua/src/?/init.lua;;" \
-            lua test_all.lua
+          moon exec lua -e "package.path = [[$GITHUB_WORKSPACE/.ci/valua/src/?.lua;$GITHUB_WORKSPACE/.ci/valua/src/?/init.lua;]] .. package.path; dofile('test_all.lua')"
       - name: Export the complete orbit
         run: moon run package
       - name: Export release packages

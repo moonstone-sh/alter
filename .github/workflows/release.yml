@@ -56,9 +56,7 @@ jobs:
         run: |
           moon sync --locked
           scripts/sync-local-packages.sh
-          moon exec env \
-            LUA_PATH="$GITHUB_WORKSPACE/.ci/valua/src/?.lua;$GITHUB_WORKSPACE/.ci/valua/src/?/init.lua;;" \
-            lua test_all.lua
+          moon exec lua -e "package.path = [[$GITHUB_WORKSPACE/.ci/valua/src/?.lua;$GITHUB_WORKSPACE/.ci/valua/src/?/init.lua;]] .. package.path; dofile('test_all.lua')"
           moon run package
           scripts/package-all.sh
           scripts/verify-release-descriptors.sh
