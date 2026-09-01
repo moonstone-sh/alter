@@ -9,6 +9,11 @@ on:
         description: Existing v* tag to publish after a publish-only failure.
         required: true
         type: string
+      bootstrap_private:
+        description: Publish new private coordinates without public-resolution checks; only for an explicitly supervised first release.
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -97,6 +102,7 @@ jobs:
         env:
           MOONSTONE_TOKEN: ${{ secrets.MOONSTONE_TOKEN }}
           RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
+          BOOTSTRAP_PRIVATE: ${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap_private || 'false' }}
         run: |
           set -eu
           test -n "$MOONSTONE_TOKEN"
@@ -109,6 +115,13 @@ jobs:
             # registry's interactive visibility change. Upload a registry-owned
             # blob so the same release path is valid before and after promotion.
             unset MOONSTONE_ARTIFACT_URL
-            "$package_dir/publish.sh"
-            scripts/wait-for-publication.sh "$package_dir/package.toml"
+            if "$package_dir/publish.sh"; then
+              if [ "$BOOTSTRAP_PRIVATE" != "true" ]; then
+                scripts/wait-for-publication.sh "$package_dir/package.toml"
+              fi
+            else
+              # Retrying a release after a partial publication is safe only
+              # when the already-published version is publicly resolvable.
+              scripts/wait-for-publication.sh "$package_dir/package.toml"
+            fi
           done
