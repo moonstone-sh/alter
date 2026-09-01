@@ -105,8 +105,10 @@ jobs:
             json-backend/dist/registry \
             toml-backend/dist/registry \
             jsonc-backend/dist/registry; do
-            asset="$(find "$package_dir" -maxdepth 1 -type f -name '*.tar.*' -print -quit)"
-            export MOONSTONE_ARTIFACT_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/$(basename "$asset")"
+            # A first publication is private until its owner completes the
+            # registry's interactive visibility change. Upload a registry-owned
+            # blob so the same release path is valid before and after promotion.
+            unset MOONSTONE_ARTIFACT_URL
             "$package_dir/publish.sh"
             scripts/wait-for-publication.sh "$package_dir/package.toml"
           done
