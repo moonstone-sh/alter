@@ -25,8 +25,3 @@ name = "moonstone/alter"
 constraint = "path:../host"
 registry = "path"
 role = "runtime"
-
-[[dependencies]]
-name = "moonstone/valua"
-constraint = "^0.2.2"
-role = "tool"

@@ -33,6 +33,11 @@ jobs:
           repository: moonstone-sh/ballad
           ref: v0.3.6
           path: .ci/ballad
+      - uses: actions/checkout@v4
+        with:
+          repository: moonstone-sh/valua
+          ref: v0.2.2
+          path: .ci/valua
       - uses: mlugg/setup-zig@v2
         with:
           version: 0.16.0
@@ -51,7 +56,9 @@ jobs:
         run: |
           moon sync --locked
           scripts/sync-local-packages.sh
-          moon run test
+          moon exec env \
+            LUA_PATH="$GITHUB_WORKSPACE/.ci/valua/src/?.lua;$GITHUB_WORKSPACE/.ci/valua/src/?/init.lua;;" \
+            lua test_all.lua
           moon run package
           scripts/package-all.sh
           scripts/verify-release-descriptors.sh
