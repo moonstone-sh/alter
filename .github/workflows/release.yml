@@ -50,6 +50,7 @@ jobs:
           BALLAD_ROOT: ${{ github.workspace }}/.ci/ballad
         run: |
           moon sync --locked
+          scripts/sync-local-packages.sh
           moon run test
           moon run package
           scripts/package-all.sh

@@ -38,13 +38,15 @@ jobs:
           echo "$GITHUB_WORKSPACE/.ci/moonstone/zig-out/bin" >> "$GITHUB_PATH"
       - name: Synchronize locked workspace
         run: moon sync --locked
+      - name: Synchronize local package dependencies
+        run: scripts/sync-local-packages.sh
       - name: Run host and backend tests
         run: moon run test
       - name: Export the complete orbit
         run: moon run package
-      - name: Export and verify all release packages
+      - name: Export release packages
         env:
           BALLAD_ROOT: ${{ github.workspace }}/.ci/ballad
-        run: |
-          scripts/package-all.sh
-          scripts/verify-release-descriptors.sh
+        run: scripts/package-all.sh
+      - name: Verify all release package descriptors
+        run: scripts/verify-release-descriptors.sh
