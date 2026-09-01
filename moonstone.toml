@@ -2,7 +2,7 @@ manifest_version = 2
 
 [package]
 name = "moonstone/alter-workspace"
-version = "0.1.0"
+version = "0.1.1"
 kind = "script"
 description = "Alter Structured Document Editing Host and Backends"
 

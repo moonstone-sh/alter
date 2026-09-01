@@ -5,6 +5,7 @@ return ballad.partiture(function(p)
     local convention = ballad.conventions
     local project = moonstone.project({ root = "." })
     local artifact = moonstone.registry.source_package(project, {
+        readme = "REGISTRY_README.md",
         collect = {
             lua_modules = {
                 convention.tree("src", {
