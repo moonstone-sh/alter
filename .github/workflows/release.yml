@@ -1,0 +1,100 @@
+name: Publish Alter
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing v* tag to publish after a publish-only failure.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish Alter packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref }}
+      - uses: actions/checkout@v4
+        with:
+          repository: moonstone-sh/moonstone
+          ref: main
+          path: .ci/moonstone
+      - uses: actions/checkout@v4
+        with:
+          repository: moonstone-sh/ballad
+          ref: v0.3.6
+          path: .ci/ballad
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+      - name: Install release tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y b3sum zstd
+      - name: Build Moonstone CLI
+        working-directory: .ci/moonstone
+        run: |
+          zig build
+          echo "$GITHUB_WORKSPACE/.ci/moonstone/zig-out/bin" >> "$GITHUB_PATH"
+      - name: Synchronize, test, and export tagged Alter
+        env:
+          BALLAD_ROOT: ${{ github.workspace }}/.ci/ballad
+        run: |
+          moon sync --locked
+          moon run test
+          moon run package
+          scripts/package-all.sh
+          scripts/verify-release-descriptors.sh
+      - name: Verify release tag and package versions
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
+        run: |
+          set -eu
+          expected="${RELEASE_TAG#v}"
+          test "$expected" = "$(sed -n 's/^version = "\(.*\)"$/\1/p' moonstone.toml | head -1)"
+          for manifest in host/moonstone.toml json-backend/moonstone.toml jsonc-backend/moonstone.toml toml-backend/moonstone.toml; do
+            actual="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$manifest" | head -1)"
+            test "$actual" = "$expected"
+          done
+      - name: Create GitHub release and upload immutable archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
+        run: |
+          set -eu
+          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --title "Alter $RELEASE_TAG" --generate-notes
+          for package_dir in \
+            host/dist/registry \
+            json-backend/dist/registry \
+            toml-backend/dist/registry \
+            jsonc-backend/dist/registry; do
+            asset="$(find "$package_dir" -maxdepth 1 -type f -name '*.tar.*' -print -quit)"
+            test -n "$asset"
+            gh release upload "$RELEASE_TAG" "$asset" --clobber
+          done
+      - name: Publish registry packages in dependency order
+        env:
+          MOONSTONE_TOKEN: ${{ secrets.MOONSTONE_TOKEN }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
+        run: |
+          set -eu
+          test -n "$MOONSTONE_TOKEN"
+          for package_dir in \
+            host/dist/registry \
+            json-backend/dist/registry \
+            toml-backend/dist/registry \
+            jsonc-backend/dist/registry; do
+            asset="$(find "$package_dir" -maxdepth 1 -type f -name '*.tar.*' -print -quit)"
+            export MOONSTONE_ARTIFACT_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/$(basename "$asset")"
+            "$package_dir/publish.sh"
+            scripts/wait-for-publication.sh "$package_dir/package.toml"
+          done
