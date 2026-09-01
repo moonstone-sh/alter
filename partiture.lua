@@ -6,7 +6,10 @@ return ballad.partiture(function(p)
 
     local function package_orbit(name)
         return moonstone.orbit(name):partiture("partiture.lua"):run({
-            sync = "locked",
+            -- Child projects use live path dependencies while developing in
+            -- this monorepo. Their published source descriptors project
+            -- those paths to verified registry constraints.
+            sync = "update",
             inputs = { "moonstone.toml", "moonstone.lock", "partiture.lua", "src/**" },
         }):product("package")
     end

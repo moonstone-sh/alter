@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: moonstone-sh/ballad
-          ref: v0.3.6
+          ref: v0.3.7
           path: .ci/ballad
       - uses: actions/checkout@v4
         with:

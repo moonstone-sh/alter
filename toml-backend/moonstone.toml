@@ -17,7 +17,7 @@ package = "moon exec ballad -- play partiture.lua"
 
 [[dependencies]]
 name = "moonstone/ballad"
-constraint = "^0.3.5"
+constraint = "^0.3.7"
 role = "tool"
 
 [[dependencies]]
