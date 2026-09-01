@@ -41,6 +41,12 @@ jobs:
       - uses: mlugg/setup-zig@v2
         with:
           version: 0.16.0
+      - name: Verify registry publish credentials
+        env:
+          MOONSTONE_TOKEN: ${{ secrets.MOONSTONE_TOKEN }}
+        run: |
+          set -eu
+          test -n "$MOONSTONE_TOKEN"
       - name: Install release tooling
         run: |
           sudo apt-get update
