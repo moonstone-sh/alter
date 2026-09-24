@@ -8,5 +8,5 @@ lua_path="$ballad_root/src/?.lua;$ballad_root/src/?/init.lua;;"
 scripts/sync-local-packages.sh
 
 for package_dir in host json-backend toml-backend jsonc-backend; do
-  moon -C "$package_dir" exec env LUA_PATH="$lua_path" lua "$ballad_main" play partiture.lua
+  moon -C "$package_dir" exec -- env LUA_PATH="$lua_path" lua "$ballad_main" play partiture.lua
 done

@@ -65,7 +65,9 @@ jobs:
         env:
           BALLAD_ROOT: ${{ github.workspace }}/.ci/ballad
         run: |
-          moon sync --locked
+          # A multi-target lock may not yet have this runner's host profile;
+          # establish it here before the child-orbit locks are refreshed.
+          moon sync --update
           scripts/sync-local-packages.sh
           moon exec -- lua -e "package.path = [[$GITHUB_WORKSPACE/.ci/valua/src/?.lua;$GITHUB_WORKSPACE/.ci/valua/src/?/init.lua;]] .. package.path; dofile('test_all.lua')"
           moon run package
