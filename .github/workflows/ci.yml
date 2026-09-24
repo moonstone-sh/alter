@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: moonstone-sh/ballad
-          ref: v0.3.7
+          ref: v0.4.0
           path: .ci/ballad
       - uses: actions/checkout@v4
         with:
@@ -41,13 +41,13 @@ jobs:
         run: |
           zig build
           echo "$GITHUB_WORKSPACE/.ci/moonstone/zig-out/bin" >> "$GITHUB_PATH"
-      - name: Synchronize locked workspace
-        run: moon sync --locked
+      - name: Synchronize workspace for this runner target
+        run: moon sync --update
       - name: Synchronize local package dependencies
         run: scripts/sync-local-packages.sh
       - name: Run host and backend tests
         run: |
-          moon exec lua -e "package.path = [[$GITHUB_WORKSPACE/.ci/valua/src/?.lua;$GITHUB_WORKSPACE/.ci/valua/src/?/init.lua;]] .. package.path; dofile('test_all.lua')"
+          moon exec -- lua -e "package.path = [[$GITHUB_WORKSPACE/.ci/valua/src/?.lua;$GITHUB_WORKSPACE/.ci/valua/src/?/init.lua;]] .. package.path; dofile('test_all.lua')"
       - name: Export the complete orbit
         run: moon run package
       - name: Export release packages
