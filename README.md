@@ -67,3 +67,7 @@ conformance.run({
 | TOML | Supported | Supported | Supported |
 
 JSONC v0.1 is structural: it retains comments verbatim but rewrites the document and emits retained comments ahead of it. It does not promise original comment placement. See each package’s registry README for precise format notes.
+
+## Lua flavors
+
+The host and all three backends are plain Lua that runs unchanged on Lua 5.1–5.5 and LuaJIT 2.1, so they ship no Moonstone flavor variants (`mod@lua54.lua` files; see Moonstone's `docs/PROJECT_ENVIRONMENT.md`, "Flavors"). Version differences are handled with neutral idioms such as `local unpack = table.unpack or unpack`. Run `lua test_all.lua` under each interpreter before a release; add a variant (always beside a working untagged file) only for code that cannot be written once for every Lua.

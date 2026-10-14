@@ -1,6 +1,7 @@
 local alter = require("alter")
 local errors = require("alter.errors")
 local mutation_mod = require("alter.mutation")
+local unpack = table.unpack or unpack -- Lua 5.2+ / Lua 5.1 and LuaJIT
 
 local mutator = {}
 
@@ -160,7 +161,7 @@ function mutator.apply(root_node, mut)
 
         if type(seg) == "string" then
             if cur.kind ~= "object" then
-                return false, errors.conflict({ table.unpack(path, 1, i) }, "object", cur.kind)
+                return false, errors.conflict({ unpack(path, 1, i) }, "object", cur.kind)
             end
             local found = nil
             for _, entry in ipairs(cur.entries) do
@@ -186,7 +187,7 @@ function mutator.apply(root_node, mut)
             end
         elseif type(seg) == "number" then
             if cur.kind ~= "array" then
-                return false, errors.conflict({ table.unpack(path, 1, i) }, "array", cur.kind)
+                return false, errors.conflict({ unpack(path, 1, i) }, "array", cur.kind)
             end
             local el = cur.elements[seg]
             if not el then
@@ -284,7 +285,7 @@ function mutator.apply(root_node, mut)
         end
         if type(mut.value) == "table" then
             for k, v in pairs(mut.value) do
-                local sub_path = { table.unpack(path) }
+                local sub_path = { unpack(path) }
                 table.insert(sub_path, tostring(k))
                 mutator.apply(root_node, { kind = "set", path = sub_path, value = v })
             end
