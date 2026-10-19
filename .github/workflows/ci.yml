@@ -17,12 +17,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: moonstone-sh/moonstone
-          ref: main
+          ref: 69d2859c80a8b3221e9368d6414ba11fdef486de
           path: .ci/moonstone
       - uses: actions/checkout@v4
         with:
           repository: moonstone-sh/ballad
-          ref: v0.4.0
+          ref: af29ad4224bcd7ec48c371154fbc3b46fb29a9e5
           path: .ci/ballad
       - uses: actions/checkout@v4
         with:
@@ -42,7 +42,12 @@ jobs:
           zig build
           echo "$GITHUB_WORKSPACE/.ci/moonstone/zig-out/bin" >> "$GITHUB_PATH"
       - name: Synchronize workspace for this runner target
-        run: moon sync --update
+        run: |
+          for project in . host json-backend toml-backend jsonc-backend; do
+            moon -C "$project" remove moonstone/ballad --no-sync
+            moon -C "$project" add "path:$GITHUB_WORKSPACE/.ci/ballad" --tool --no-sync
+          done
+          moon sync --update
       - name: Synchronize local package dependencies
         run: scripts/sync-local-packages.sh
       - name: Run host and backend tests
@@ -70,7 +75,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: moonstone-sh/ballad
-          ref: af29ad4
+          ref: af29ad4224bcd7ec48c371154fbc3b46fb29a9e5
           path: .ci/ballad
       - uses: actions/checkout@v4
         with:
