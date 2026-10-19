@@ -67,3 +67,17 @@ conformance.run({
 | TOML | Supported | Supported | Supported |
 
 JSONC v0.1 is structural: it retains comments verbatim but rewrites the document and emits retained comments ahead of it. It does not promise original comment placement. See each package’s registry README for precise format notes.
+
+### Native Windows validation
+
+The default file-backed commit uses a Windows flavor helper to replace existing
+files through .NET `File.Replace`, invoked with Windows PowerShell. Paths are
+encoded as data, including spaces, Unicode, and command metacharacters. A failed
+replacement leaves the destination intact. An injected
+`fs.write_file_atomic` implementation still takes precedence.
+
+`tests/platform/native_lifecycle.py` tests a disposable checkout, including edits
+and all four Ballad source exports. For local runs, set `MOONSTONE_BIN`,
+`BALLAD_SOURCE`, and `VALUA_SOURCE`. The Windows workflow pins the pending
+Moonstone and Ballad framework changes. Source archives include the Windows
+flavor; the current host determines file replacement behavior.
