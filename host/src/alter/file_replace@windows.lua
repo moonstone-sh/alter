@@ -21,7 +21,7 @@ local function literal(value)
 end
 return function(source, destination)
     local script = "$ErrorActionPreference='Stop';$s=" .. literal(source) .. ";$d=" .. literal(destination)
-        .. ";if([IO.File]::Exists($d)){[IO.File]::Replace($s,$d,$null)}else{[IO.File]::Move($s,$d)}"
+        .. ";if([IO.File]::Exists($d)){[IO.File]::Replace($s,$d,[NullString]::Value)}else{[IO.File]::Move($s,$d)}"
     -- EncodedCommand is UTF-16LE. The script itself is ASCII; paths carry UTF-8
     -- inside base64 literals, never cmd syntax or PowerShell interpolation.
     local encoded = base64((script:gsub(".", function(c) return c .. "\0" end)))
