@@ -1,5 +1,6 @@
 local errors = require("alter.errors")
 local mutation_mod = require("alter.mutation")
+local unpack = table.unpack or unpack -- Lua 5.2+ / Lua 5.1 and LuaJIT
 
 local FakeDocument = {}
 FakeDocument.__index = FakeDocument
@@ -279,7 +280,7 @@ function FakeDocument:apply(mut)
         elseif type(next_val) == "table" then
             cur = next_val
         else
-            return false, errors.conflict({ table.unpack(path, 1, i) }, "object", determine_kind(next_val))
+            return false, errors.conflict({ unpack(path, 1, i) }, "object", determine_kind(next_val))
         end
     end
 

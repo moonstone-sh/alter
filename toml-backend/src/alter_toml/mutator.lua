@@ -3,6 +3,7 @@ local errors = require("alter.errors")
 local mutation_mod = require("alter.mutation")
 local parser = require("alter_toml.parser")
 local serializer = require("alter_toml.serializer")
+local unpack = table.unpack or unpack -- Lua 5.2+ / Lua 5.1 and LuaJIT
 
 local mutator = {}
 
@@ -393,7 +394,7 @@ function mutator.apply(ast, mut)
         end
         if type(mut.value) == "table" then
             for k, v in pairs(mut.value) do
-                local sub_path = { table.unpack(path) }
+                local sub_path = { unpack(path) }
                 table.insert(sub_path, tostring(k))
                 mutator.apply(ast, { kind = "set", path = sub_path, value = v })
             end

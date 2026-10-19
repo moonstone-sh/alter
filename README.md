@@ -81,3 +81,7 @@ and all four Ballad source exports. For local runs, set `MOONSTONE_BIN`,
 `BALLAD_SOURCE`, and `VALUA_SOURCE`. The Windows workflow pins the pending
 Moonstone and Ballad framework changes. Source archives include the Windows
 flavor; the current host determines file replacement behavior.
+
+## Lua flavors
+
+The editing core and all three backends run on Lua 5.1–5.5 and LuaJIT 2.1. File replacement has a Windows host variant, with an untagged POSIX implementation; see Moonstone's `docs/PROJECT_ENVIRONMENT.md`, "Flavors". Version differences are handled with neutral idioms such as `local unpack = table.unpack or unpack`. Run `lua test_all.lua` under each interpreter before a release; add a variant (always beside a working untagged file) only for code that cannot be written once for every Lua.
