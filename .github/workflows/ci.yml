@@ -56,3 +56,36 @@ jobs:
         run: scripts/package-all.sh
       - name: Verify all release package descriptors
         run: scripts/verify-release-descriptors.sh
+
+  windows:
+    name: Native Windows edits and orbit exports
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: moonstone-sh/moonstone
+          ref: 69d2859c80a8b3221e9368d6414ba11fdef486de
+          path: .ci/moonstone
+      - uses: actions/checkout@v4
+        with:
+          repository: moonstone-sh/ballad
+          ref: af29ad4
+          path: .ci/ballad
+      - uses: actions/checkout@v4
+        with:
+          repository: moonstone-sh/valua
+          ref: v0.2.2
+          path: .ci/valua
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+      - name: Build Moonstone
+        working-directory: .ci/moonstone
+        run: zig build
+      - name: Exercise edits and all source exports
+        shell: pwsh
+        run: |
+          $env:MOONSTONE_BIN = "$env:GITHUB_WORKSPACE/.ci/moonstone/zig-out/bin/moon.exe"
+          python tests/platform/native_lifecycle.py
+          if ($LASTEXITCODE -ne 0) { throw 'Alter lifecycle failed' }

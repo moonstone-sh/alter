@@ -115,9 +115,13 @@ function Document:commit()
             if not f then
                 return nil, errors.error("io_error", "Failed to open tmp file: " .. tostring(err), nil, err)
             end
-            f:write(rendered_text)
-            f:close()
-            local ren_ok, ren_err = os.rename(tmp_path, self._filepath)
+            local written, write_err = f:write(rendered_text)
+            local closed, close_err = f:close()
+            if not written or not closed then
+                os.remove(tmp_path)
+                return nil, errors.error("io_error", "Failed to write tmp file: " .. tostring(write_err or close_err))
+            end
+            local ren_ok, ren_err = require("alter.file_replace")(tmp_path, self._filepath)
             if not ren_ok then
                 os.remove(tmp_path)
                 return nil, errors.error("io_error", "Failed to commit atomic rename: " .. tostring(ren_err), nil, ren_err)

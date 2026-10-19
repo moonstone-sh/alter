@@ -23,7 +23,7 @@ describe("Host Document API", function()
         end)
 
         it("alter.open loads file from disk", function()
-            local tmp_file = "/tmp/alter_test_open_" .. tostring(os.time()) .. ".txt"
+            local tmp_file = os.tmpname()
             local f = io.open(tmp_file, "w")
             assert_not_nil(f)
             f:write('{"opened": true}')
@@ -37,7 +37,8 @@ describe("Host Document API", function()
         end)
 
         it("alter.open with create=true handles missing files", function()
-            local missing_file = "/tmp/alter_test_missing_" .. tostring(os.time()) .. ".txt"
+            local missing_file = os.tmpname()
+            os.remove(missing_file)
             os.remove(missing_file)
 
             local doc, err = alter.open(missing_file, { backend = FakeBackend, create = true, default_text = '{"default": 1}' })
@@ -149,7 +150,9 @@ describe("Host Document API", function()
         end)
 
         it("committing file document writes atomically and persists to disk", function()
-            local tmp_path = "/tmp/alter_atomic_test_" .. tostring(os.time()) .. "_" .. tostring(math.random(1000, 9999)) .. ".txt"
+            local tmp_path = os.tmpname()
+            os.remove(tmp_path)
+            tmp_path = tmp_path .. " spaced & UTF8 ñ.txt"
             local f = io.open(tmp_path, "w")
             assert_not_nil(f)
             f:write('{"initial": 1}')
@@ -172,6 +175,18 @@ describe("Host Document API", function()
             assert_match(disk_text, "added")
             assert_match(disk_text, "yes")
 
+            doc:at("initial"):set(3)
+            assert_true(doc:commit().changed)
+            local before_file = assert(io.open(tmp_path, "rb"))
+            local before = before_file:read("*a")
+            before_file:close()
+            local missing = os.tmpname()
+            os.remove(missing)
+            local replaced = require("alter.file_replace")(missing, tmp_path)
+            assert_true(not replaced)
+            local after_file = assert(io.open(tmp_path, "rb"))
+            assert_equal(after_file:read("*a"), before)
+            after_file:close()
             -- Clean up
             os.remove(tmp_path)
         end)
