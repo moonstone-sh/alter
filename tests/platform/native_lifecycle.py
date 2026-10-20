@@ -13,6 +13,7 @@ repo = Path(__file__).resolve().parents[2]
 moon = os.environ.get('MOONSTONE_BIN') or shutil.which('moon')
 ballad = Path(os.environ.get('BALLAD_SOURCE', repo/'.ci/ballad')).resolve()
 valua = Path(os.environ.get('VALUA_SOURCE', repo/'.ci/valua')).resolve()
+os.environ['PATH'] = str(Path(moon).resolve().parent) + os.pathsep + os.environ.get('PATH', '')
 assert moon and (ballad/'src/main.lua').is_file() and (valua/'src/valua.lua').is_file()
 with tempfile.TemporaryDirectory(prefix='alter lifecycle ') as directory:
     root = Path(directory)/'source'
