@@ -17,13 +17,14 @@ local function base64(bytes)
     return table.concat(result)
 end
 local function literal(value)
-    return "[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('" .. base64(value) .. "'))"
+    return "[Text.Encoding]::Default.GetString([Convert]::FromBase64String('" .. base64(value) .. "'))"
 end
 return function(source, destination)
     local script = "$ErrorActionPreference='Stop';$s=" .. literal(source) .. ";$d=" .. literal(destination)
         .. ";if([IO.File]::Exists($d)){[IO.File]::Replace($s,$d,[NullString]::Value)}else{[IO.File]::Move($s,$d)}"
-    -- EncodedCommand is UTF-16LE. The script itself is ASCII; paths carry UTF-8
-    -- inside base64 literals, never cmd syntax or PowerShell interpolation.
+    -- EncodedCommand is UTF-16LE. Paths are byte strings from Lua narrow
+    -- filesystem APIs, decoded with the matching Windows ANSI code page. They
+    -- remain data, never cmd syntax or PowerShell interpolation.
     local encoded = base64((script:gsub(".", function(c) return c .. "\0" end)))
     local ok, _, code = os.execute("powershell.exe -NoLogo -NoProfile -NonInteractive -EncodedCommand " .. encoded)
     if ok == true or ok == 0 then return true end

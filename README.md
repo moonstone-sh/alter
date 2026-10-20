@@ -72,7 +72,8 @@ JSONC v0.1 is structural: it retains comments verbatim but rewrites the document
 
 The default file-backed commit uses a Windows flavor helper to replace existing
 files through .NET `File.Replace`, invoked with Windows PowerShell. Paths are
-encoded as data, including spaces, Unicode, and command metacharacters. A failed
+encoded as data, including spaces and command metacharacters. Filename encoding
+follows the Lua runtime's narrow filesystem APIs. A failed
 replacement leaves the destination intact. An injected
 `fs.write_file_atomic` implementation still takes precedence.
 
