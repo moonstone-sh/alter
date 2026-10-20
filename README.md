@@ -68,6 +68,21 @@ conformance.run({
 
 JSONC v0.1 is structural: it retains comments verbatim but rewrites the document and emits retained comments ahead of it. It does not promise original comment placement. See each package’s registry README for precise format notes.
 
+### Native Windows validation
+
+The default file-backed commit uses a Windows flavor helper to replace existing
+files through .NET `File.Replace`, invoked with Windows PowerShell. Paths are
+encoded as data, including spaces and command metacharacters. Filename encoding
+follows the Lua runtime's narrow filesystem APIs. A failed
+replacement leaves the destination intact. An injected
+`fs.write_file_atomic` implementation still takes precedence.
+
+`tests/platform/native_lifecycle.py` tests a disposable checkout, including edits
+and all four Ballad source exports. For local runs, set `MOONSTONE_BIN`,
+`BALLAD_SOURCE`, and `VALUA_SOURCE`. The Windows workflow pins the pending
+Moonstone and Ballad framework changes. Source archives include the Windows
+flavor; the current host determines file replacement behavior.
+
 ## Lua flavors
 
-The host and all three backends are plain Lua that runs unchanged on Lua 5.1–5.5 and LuaJIT 2.1, so they ship no Moonstone flavor variants (`mod@lua54.lua` files; see Moonstone's `docs/PROJECT_ENVIRONMENT.md`, "Flavors"). Version differences are handled with neutral idioms such as `local unpack = table.unpack or unpack`. Run `lua test_all.lua` under each interpreter before a release; add a variant (always beside a working untagged file) only for code that cannot be written once for every Lua.
+The editing core and all three backends run on Lua 5.1–5.5 and LuaJIT 2.1. File replacement has a Windows host variant, with an untagged POSIX implementation; see Moonstone's `docs/PROJECT_ENVIRONMENT.md`, "Flavors". Version differences are handled with neutral idioms such as `local unpack = table.unpack or unpack`. Run `lua test_all.lua` under each interpreter before a release; add a variant (always beside a working untagged file) only for code that cannot be written once for every Lua.
